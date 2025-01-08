@@ -24,6 +24,7 @@ public class player : MonoBehaviour
     private bool isGameStarted = false; // 修改：添加private修饰符
     private bool isDead = false;  // 添加死亡状态标志
     private ButtonManager buttonManager;
+    private bool hasShownVictory = false;  // 添加标记
 
     void Start()
     {
@@ -84,6 +85,7 @@ public class player : MonoBehaviour
             if (startButton != null)
             {
                 startButton.SetActive(true);
+                Debug.Log("startButton已显示");
             }
             Time.timeScale = 0f;
         }
@@ -222,6 +224,32 @@ public class player : MonoBehaviour
                 scoreText.text = "地下" + score.ToString() + "层";
             }
 
+        // 检查是否达到100层
+        if (score == 100)
+        {
+            // 暂停游戏
+            Time.timeScale = 0f;
+            // 显示胜利按钮
+            if (replayButton != null)
+            {
+                replayButton.SetActive(true);
+                // 修改继续按钮的文本
+                Text buttonText = replayButton.GetComponentInChildren<Text>();
+                if (buttonText != null)
+                {
+                    buttonText.text = "恭喜，胜利通关！\n点击继续";
+                }
+                Debug.Log("显示胜利按钮");
+            }
+            else
+            {
+                Debug.LogError("继续按钮引用丢失");
+            }
+            hasShownVictory = true;  // 设置标记为true
+            // 暂停音乐（如果需要）
+            MusicManager.PauseMusic();
+        }
+
             if (floorManager != null)
             {
             // 每20层增加速度
@@ -246,6 +274,13 @@ public class player : MonoBehaviour
         deathSound.Play();
         Time.timeScale = 0f;
         replayButton.SetActive(true);
+        // 根据是否显示过胜利信息来设置按钮文本
+        Text buttonText = replayButton.GetComponentInChildren<Text>();
+        if (buttonText != null && hasShownVictory)
+        {
+            buttonText.text = "重新开始";  // 始终显示"重新开始"
+            hasShownVictory = false;
+        }
         MusicManager.StopMusic();
     }
 
@@ -256,18 +291,23 @@ public class player : MonoBehaviour
         // 确保音乐播放
         MusicManager.ResumeMusic();
 
-        SceneManager.LoadScene("SampleScene");
-        // 直接开始游戏，不显示开始按钮
-        isGameStarted = true;
-        // 设置继续游戏标志
-        PlayerPrefs.SetInt("ContinueGame", 1);
-        // 加载场景
-        SceneManager.LoadScene("SampleScene");
-
+        if (score == 100)
+        {
+            // 继续游戏，不重置分数
+            replayButton.SetActive(false);
+        }
+        else
+        {
+            SceneManager.LoadScene("SampleScene");
+            // 直接开始游戏，不显示开始按钮
+            isGameStarted = true;
+            // 设置继续游戏标志
+            PlayerPrefs.SetInt("ContinueGame", 1);
+            // 加载场景
+            SceneManager.LoadScene("SampleScene");
+        }
         Floors floors = FindObjectOfType<Floors>();
         floors.currentMoveSpeed = 1f;  // 重置为基础速度
-
-        moveSpeed = 1f;
 
         startButton.SetActive(false);
     }

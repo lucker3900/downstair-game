@@ -50,13 +50,6 @@ public class ButtonManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // 如果继续按钮处于激活状态，直接返回
-            /*if (continueButton != null && (continueButton.gameObject.activeSelf || startButton.gameObject.activeSelf))
-            {
-                Debug.Log("开始/继续按钮激活中，空格键禁用");
-                return;
-            }*/
-
             Debug.Log("触发暂停/继续");
             TogglePause();
         }
@@ -130,7 +123,7 @@ public class ButtonManager : MonoBehaviour
     public void TogglePause()
     {
         // 如果继续按钮激活，不允许暂停
-        if (continueButton != null && (continueButton.gameObject.activeSelf || startButton.gameObject.activeSelf))
+        if (continueButton != null && (continueButton.gameObject.activeInHierarchy || startButton.gameObject.activeInHierarchy))
         {
             Debug.Log($"继续按钮状态: {continueButton.gameObject.activeSelf}");
             Debug.Log($"开始按钮状态: {startButton.gameObject.activeSelf}");
